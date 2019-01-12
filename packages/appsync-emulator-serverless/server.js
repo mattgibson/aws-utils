@@ -7,6 +7,7 @@ const { createSchema: createSchemaCore } = require('./schema');
 const createServerCore = require('./serverCore');
 const log = require('logdown')('appsync-emulator:server');
 const { wrapSchema } = require('./schemaWrapper');
+const { cloudFormationProcessor } = require('./cloudFormationProcessor');
 
 const ensureDynamodbTables = async (
   dynamodb,
@@ -52,7 +53,10 @@ const createSchema = async ({
   const { config: serverlessConfig } = await loadServerlessConfig(
     serverlessDirectory,
   );
-
+  const cfConfig = cloudFormationProcessor(serverlessConfig, {
+    // we do not use aliases for the dynamodb tables in server like we do in testing.
+    dynamodbTables: {},
+  });
   // eslint-disable-next-line
   schemaPath = schemaPath || path.join(serverlessDirectory, 'schema.graphql');
   if (!fs.existsSync(schemaPath)) {
@@ -60,10 +64,10 @@ const createSchema = async ({
   }
 
   const graphqlSchema = wrapSchema(fs.readFileSync(schemaPath, 'utf8'));
-  const { custom: { appSync: appSyncConfig } = {} } = serverlessConfig;
+  const { custom: { appSync: appSyncConfig } = {} } = cfConfig;
   const dynamodbTables = await ensureDynamodbTables(
     dynamodb,
-    serverlessConfig,
+    cfConfig,
     appSyncConfig,
   );
 
@@ -72,7 +76,7 @@ const createSchema = async ({
     dynamodbTables,
     graphqlSchema,
     serverlessDirectory,
-    serverlessConfig,
+    serverlessConfig: cfConfig,
     pubsub,
   });
 };

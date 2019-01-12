@@ -168,7 +168,7 @@ custom:
         name: QuoteRequest
         description: QuoteRequest description
         config:
-          tableName: QuoteRequest-emulator
+          tableName: { Ref: QuoteRequestTable }
           serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
       - type: AMAZON_DYNAMODB
         name: ${self:custom.quote}Response
@@ -205,7 +205,7 @@ custom:
         description: 'Python Lambda DataSource'
         config:
           lambdaFunctionArn: { Fn::GetAtt: [PythonLambdaFunction, Arn] }
-          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] } 
+          serviceRoleArn: { Fn::GetAtt: [AppSyncLambdaServiceRole, Arn] }
           functionName: pythonGraphQL
 functions:
   graphqlJSON:
