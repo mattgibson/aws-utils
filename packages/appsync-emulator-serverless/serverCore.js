@@ -344,10 +344,15 @@ const createServer = async ({
     subscriptions,
   });
 
+  const corsOptions = {
+    origin: '*',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  };
+
   // graphql server.
   const app = express();
   app.use(express.json());
-  app.use(require('cors')());
+  app.use(require('cors')(corsOptions));
   const handler = createGQLHandler({ schema, subServer });
 
   app.post('/graphql', async (req, res) => {
